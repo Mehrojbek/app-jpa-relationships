@@ -38,6 +38,16 @@ public class GroupController {
         return allByFaculty_universityId;
     }
 
+    // KURATOR UCHUN
+    @GetMapping("/{id}")
+    public Group getGroupById(@PathVariable Integer id){
+        Optional<Group> optionalGroup = groupRepository.findById(id);
+        if (optionalGroup.isPresent()) {
+            return optionalGroup.get();
+        }
+        return null;
+    }
+
     @PostMapping
     public String addGroup(@RequestBody GroupDto groupDto) {
 
@@ -55,5 +65,33 @@ public class GroupController {
         return "Group added";
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteGroup(@PathVariable Integer id){
+        try {
+            groupRepository.deleteById(id);
+            return "group deleted";
+        }catch (Exception e){
+            return "exception in deleting";
+        }
+    }
+
+    @PutMapping("/{id}")
+    public String editGroup(@PathVariable Integer id, @RequestBody GroupDto groupDto){
+        Optional<Group> optionalGroup = groupRepository.findById(id);
+        if (optionalGroup.isPresent()) {
+            Optional<Faculty> optionalFaculty = facultyRepository.findById(groupDto.getFacultyId());
+            if (optionalFaculty.isPresent()) {
+                Faculty faculty = optionalFaculty.get();
+
+                Group editingGroup = optionalGroup.get();
+                editingGroup.setName(groupDto.getName());
+                editingGroup.setFaculty(faculty);
+                groupRepository.save(editingGroup);
+                return "Group edited";
+            }
+            return "faculty not found";
+        }
+        return "group not found";
+    }
 
 }
